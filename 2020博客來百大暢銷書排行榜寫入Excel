@@ -1,1 +1,42 @@
+from bs4 import BeautifulSoup
+import requests
+import xlwings as xw
+
+#擷取博客來2020年度百大暢銷榜的資料
+res = requests.get("https://www.books.com.tw/web/annual100_cat/2101")
+html = BeautifulSoup(res.text, "html.parser")
+
+top_list=html.findAll("p",{"class":"top-list"}) #顯示top名次
+booknames2_list=html.findAll("h4") #顯示書名
+author2_list=html.findAll("li")#顯示作者，從第76開始到第274個，都是偶數
+price_list=html.findAll("li",{"class":"price"}) #顯示價錢
+
+wb = xw.Book()
+sheet = wb.sheets["工作表1"]
+sheet.range("A1").value = "名次"
+sheet.range("B1").value = "書名"
+sheet.range("C1").value = "作者"
+sheet.range("D1").value = "價錢"
+
+row = 2 
+for top in top_list:
+    sheet.range(f"A{row}").value = top.text
+    row=row +1
+
+row=2
+for bookname in booknames2_list[0:100]: 
+    sheet.range(f"B{row}").value = bookname.text
+    row = row +1
+
+row=2   
+row=row +1
+for author in author2_list[76:276:2]:    
+    sheet.range(f"C{row}").value =author.text
+
+row=2   
+for price in price_list:
+    sheet.range(f"D{row}").value =price.text
+row=row +1
+
+
 
